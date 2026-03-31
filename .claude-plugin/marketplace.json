@@ -1,0 +1,16 @@
+{
+  "name": "claude-usage-statusline",
+  "description": "Community plugins by simao-coutinho",
+  "owner": {
+    "name": "simao-coutinho",
+    "url": "https://github.com/simao-coutinho"
+  },
+  "plugins": [
+    {
+      "name": "claude-usage-statusline",
+      "description": "Real-time usage percentages, burn rate, reset countdowns and exhaustion prediction in your terminal status line",
+      "version": "1.0.0",
+      "source": "./"
+    }
+  ]
+}

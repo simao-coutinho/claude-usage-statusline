@@ -35,39 +35,38 @@ A Claude Code plugin that displays real-time usage percentages and reset countdo
 
 ## Installation
 
-### Option 1: Install via `/plugins` command (recommended)
+### Option 1: Install via marketplace (recommended)
 
-Inside Claude Code, type:
+Add the marketplace to your `~/.claude/settings.json`:
 
-```
-/plugins add github:simao-coutinho/claude-usage-statusline
-```
-
-### Option 2: Install from CLI
-
-```bash
-claude plugins add github:simao-coutinho/claude-usage-statusline
-```
-
-### Option 3: Install from local path
-
-```bash
-claude plugins add /path/to/claude-usage-statusline
+```json
+{
+  "extraKnownMarketplaces": {
+    "simao-coutinho": {
+      "source": {
+        "source": "github",
+        "repo": "simao-coutinho/claude-usage-statusline"
+      }
+    }
+  }
+}
 ```
 
-### Option 4: Manual installation
+Then open Claude Code, type `/plugins`, go to the **Discover** tab and enable **claude-usage-statusline**.
+
+### Option 2: Clone and configure manually
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/simao-coutinho/claude-usage-statusline.git ~/.claude/plugins/claude-usage-statusline
+   git clone https://github.com/simao-coutinho/claude-usage-statusline.git ~/.claude/claude-usage-statusline
    ```
 
-2. Add to your `~/.claude/settings.json`:
+2. Add the `statusLine` entry to your `~/.claude/settings.json`:
    ```json
    {
      "statusLine": {
        "type": "command",
-       "command": "sh ~/.claude/plugins/claude-usage-statusline/statusline.sh"
+       "command": "sh ~/.claude/claude-usage-statusline/statusline.sh"
      }
    }
    ```
