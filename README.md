@@ -102,6 +102,10 @@ claude-usage-statusline/
 
 Remove the plugin from `/plugins` > **Installed** tab, or manually remove the `statusLine` and `extraKnownMarketplaces` entries from `~/.claude/settings.json`.
 
+## Privacy
+
+This plugin runs entirely on your local machine. It does not collect, transmit, or store any personal data. The only file created is a temporary cache at `/tmp/.claude_statusline_cache` containing usage percentages for display consistency. No network requests are made by this plugin.
+
 ## License
 
 MIT
