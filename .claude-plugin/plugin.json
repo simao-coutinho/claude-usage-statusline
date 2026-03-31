@@ -1,0 +1,11 @@
+{
+  "name": "claude-usage-statusline",
+  "description": "Real-time usage percentages, burn rate, reset countdowns and exhaustion prediction in your terminal status line",
+  "version": "1.0.0",
+  "author": {
+    "name": "simao-coutinho",
+    "url": "https://github.com/simao-coutinho"
+  },
+  "homepage": "https://github.com/simao-coutinho/claude-usage-statusline",
+  "license": "MIT"
+}

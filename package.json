@@ -1,7 +1,0 @@
-{
-  "name": "claude-usage-statusline",
-  "version": "1.0.0",
-  "description": "Claude Code statusline plugin that displays real-time usage percentages and reset countdowns",
-  "author": "simaocoutinho",
-  "license": "MIT"
-}

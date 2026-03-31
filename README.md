@@ -82,13 +82,25 @@ The plugin consists of:
 
 The API occasionally returns 0% between updates. The plugin caches values in `/tmp/.claude_statusline_cache` and only accepts a lower value when the rate limit timer has actually expired. This prevents the status line from flickering to 0% during normal use.
 
-## Uninstall
+## Plugin structure
 
-```bash
-claude plugins remove claude-usage-statusline
+```
+claude-usage-statusline/
+├── .claude-plugin/
+│   ├── plugin.json          # Plugin manifest
+│   └── marketplace.json     # Marketplace metadata
+├── hooks/
+│   ├── hooks.json           # SessionStart hook config
+│   ├── run-hook.cmd         # Cross-platform hook runner
+│   └── setup-statusline     # Auto-configures statusLine setting
+├── statusline.sh            # Main statusline script
+├── README.md
+└── LICENSE
 ```
 
-Or manually remove the `statusLine` entry from `~/.claude/settings.json`.
+## Uninstall
+
+Remove the plugin from `/plugins` > **Installed** tab, or manually remove the `statusLine` and `extraKnownMarketplaces` entries from `~/.claude/settings.json`.
 
 ## License
 
