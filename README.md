@@ -5,7 +5,7 @@ A Claude Code plugin that displays real-time usage percentages and reset countdo
 ## What it shows
 
 ```
-5h:29.3% (1h46m)  7d:36.0% (2d15h)  ctx:10.5%
+5h:29.3% (1h46m) ~2.1%/min out@16:30  7d:36.0% (2d15h)  ctx:10.5%
 ```
 
 | Indicator | Description |
@@ -14,9 +14,13 @@ A Claude Code plugin that displays real-time usage percentages and reset countdo
 | `7d` | 7-day weekly usage percentage |
 | `ctx` | Current context window usage |
 | `(Xh Ym)` | Time until the rate limit window resets |
+| `~X.X%/min` | Burn rate — how fast you're consuming the 5h limit |
+| `out@HH:MM` | Predicted local time when the 5h limit will be exhausted |
 
 ## Features
 
+- Burn rate tracking — shows how fast you're consuming the 5h session limit
+- Exhaustion prediction — estimates when you'll hit 100% at the current pace
 - Holds the last known usage value when the API temporarily returns 0% between updates
 - Only resets to 0% when the actual rate limit timer expires
 - Shows days for 7d countdown (e.g. `3d02h`)
@@ -31,19 +35,27 @@ A Claude Code plugin that displays real-time usage percentages and reset countdo
 
 ## Installation
 
-### Option 1: Install from GitHub (recommended)
+### Option 1: Install via `/plugins` command (recommended)
+
+Inside Claude Code, type:
+
+```
+/plugins add github:YOUR_USERNAME/claude-usage-statusline
+```
+
+### Option 2: Install from CLI
 
 ```bash
 claude plugins add github:YOUR_USERNAME/claude-usage-statusline
 ```
 
-### Option 2: Install from local path
+### Option 3: Install from local path
 
 ```bash
 claude plugins add /path/to/claude-usage-statusline
 ```
 
-### Option 3: Manual installation
+### Option 4: Manual installation
 
 1. Clone the repository:
    ```bash

@@ -25,16 +25,31 @@ time_until() {
   fi
 }
 
-# Read cached values
+# Helper: format epoch as HH:MM local time
+format_time() {
+  if date --version >/dev/null 2>&1; then
+    # GNU date
+    date -d "@$1" +%H:%M
+  else
+    # BSD date (macOS)
+    date -r "$1" +%H:%M
+  fi
+}
+
+# Read cached values (lines: 1=five_pct 2=five_resets 3=week_pct 4=week_resets 5=five_prev_pct 6=five_prev_ts)
 cached_five_pct=""
 cached_five_resets=""
 cached_week_pct=""
 cached_week_resets=""
+cached_five_prev_pct=""
+cached_five_prev_ts=""
 if [ -f "$CACHE_FILE" ]; then
   cached_five_pct=$(sed -n '1p' "$CACHE_FILE")
   cached_five_resets=$(sed -n '2p' "$CACHE_FILE")
   cached_week_pct=$(sed -n '3p' "$CACHE_FILE")
   cached_week_resets=$(sed -n '4p' "$CACHE_FILE")
+  cached_five_prev_pct=$(sed -n '5p' "$CACHE_FILE")
+  cached_five_prev_ts=$(sed -n '6p' "$CACHE_FILE")
 fi
 
 # Extract current API values
@@ -86,12 +101,59 @@ if [ -n "$week_pct" ]; then
   fi
 fi
 
+# --- Burn rate calculation (based on 5h usage trend) ---
+burn_rate=""
+prediction=""
+
+if [ -n "$five_pct" ] && [ -n "$cached_five_prev_pct" ] && [ -n "$cached_five_prev_ts" ]; then
+  # Calculate %/min burn rate from previous sample
+  elapsed_secs=$((now - cached_five_prev_ts))
+  if [ "$elapsed_secs" -gt 10 ]; then
+    burn_rate=$(awk "BEGIN {
+      delta = $five_pct - $cached_five_prev_pct;
+      mins = $elapsed_secs / 60;
+      rate = (mins > 0) ? delta / mins : 0;
+      if (rate < 0) rate = 0;
+      printf \"%.2f\", rate;
+    }")
+
+    # Predict when 100% will be reached
+    remaining=$(awk "BEGIN { printf \"%.4f\", 100 - $five_pct }")
+    is_burning=$(awk "BEGIN { print ($burn_rate > 0.001) ? 1 : 0 }")
+    if [ "$is_burning" -eq 1 ]; then
+      mins_left=$(awk "BEGIN { printf \"%.0f\", $remaining / $burn_rate }")
+      exhaust_epoch=$((now + mins_left * 60))
+      prediction=$(format_time "$exhaust_epoch")
+    fi
+  fi
+fi
+
+# Update previous sample for next burn rate calculation
+# Only update if the value actually changed (avoids stale rate on idle)
+new_prev_pct="$cached_five_prev_pct"
+new_prev_ts="$cached_five_prev_ts"
+if [ -n "$five_pct" ]; then
+  if [ -z "$cached_five_prev_pct" ] || [ -z "$cached_five_prev_ts" ]; then
+    # First sample
+    new_prev_pct="$five_pct"
+    new_prev_ts="$now"
+  else
+    changed=$(awk "BEGIN { print ($five_pct != $cached_five_prev_pct) ? 1 : 0 }")
+    if [ "$changed" -eq 1 ]; then
+      new_prev_pct="$five_pct"
+      new_prev_ts="$now"
+    fi
+  fi
+fi
+
 # Save current values to cache
 cat > "$CACHE_FILE" <<EOF
 $five_pct
 $cached_five_resets
 $week_pct
 $cached_week_resets
+$new_prev_pct
+$new_prev_ts
 EOF
 
 # Build rate limits segment
@@ -100,6 +162,16 @@ if [ -n "$five_pct" ]; then
   five_label="5h:$(printf '%.1f' "$five_pct")%"
   if [ -n "$cached_five_resets" ]; then
     five_label="${five_label} ($(time_until "$cached_five_resets"))"
+  fi
+  # Append burn rate
+  if [ -n "$burn_rate" ]; then
+    is_nonzero=$(awk "BEGIN { print ($burn_rate > 0.001) ? 1 : 0 }")
+    if [ "$is_nonzero" -eq 1 ]; then
+      five_label="${five_label} ~$(printf '%.1f' "$burn_rate")%/min"
+      if [ -n "$prediction" ]; then
+        five_label="${five_label} out@${prediction}"
+      fi
+    fi
   fi
   limits="$five_label"
 fi
