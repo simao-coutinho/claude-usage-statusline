@@ -1,0 +1,26 @@
+#!/bin/bash
+# SessionStart hook: configures the statusline to use this plugin's script.
+# Reads the user's settings.json and sets the statusLine command if not already pointing here.
+
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+STATUSLINE_SCRIPT="${PLUGIN_ROOT}/statusline.sh"
+SETTINGS_FILE="${HOME}/.claude/settings.json"
+
+# Ensure settings directory exists
+mkdir -p "$(dirname "$SETTINGS_FILE")"
+
+# Ensure settings file exists
+if [ ! -f "$SETTINGS_FILE" ]; then
+  echo '{}' > "$SETTINGS_FILE"
+fi
+
+# Check if statusLine is already configured to point to our script
+current_command=$(jq -r '.statusLine.command // empty' "$SETTINGS_FILE" 2>/dev/null)
+
+if [ "$current_command" != "sh ${STATUSLINE_SCRIPT}" ]; then
+  # Update settings.json with our statusline command
+  tmp=$(mktemp)
+  jq --arg cmd "sh ${STATUSLINE_SCRIPT}" '.statusLine = {"type": "command", "command": $cmd}' "$SETTINGS_FILE" > "$tmp" && mv "$tmp" "$SETTINGS_FILE"
+fi
+
+echo "OK"
